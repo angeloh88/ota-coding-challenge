@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { usePosts } from '@/lib/hooks/use-posts';
 import { Database } from '@/lib/database.types';
@@ -16,13 +17,15 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getPaginationRowModel,
   type ColumnDef,
   type SortingState,
   type Column,
   flexRender,
 } from '@tanstack/react-table';
 import React, { Fragment, useState } from 'react';
-import { ArrowUp, ArrowDown, ImageIcon } from 'lucide-react';
+import { ArrowUp, ArrowDown, ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
   Select,
@@ -289,7 +292,13 @@ export function PostsTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
     state: {
       sorting,
     },
@@ -298,31 +307,32 @@ export function PostsTable() {
   return (
     <>
       <PostDetailModal />
-      <div className="mt-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-            Posts
-          </h2>
-          <div className="flex items-center gap-2">
-            <label
-              htmlFor="platform-filter"
-              className="text-sm text-zinc-600 dark:text-zinc-400"
-            >
-              Platform:
-            </label>
-            <Select value={selectedPlatform} onValueChange={handlePlatformChange}>
-              <SelectTrigger id="platform-filter" className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Platforms</SelectItem>
-                <SelectItem value="instagram">Instagram</SelectItem>
-                <SelectItem value="tiktok">TikTok</SelectItem>
-              </SelectContent>
-            </Select>
+      <Card className="mt-8">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Posts</CardTitle>
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="platform-filter"
+                className="text-sm text-zinc-600 dark:text-zinc-400"
+              >
+                Platform:
+              </label>
+              <Select value={selectedPlatform} onValueChange={handlePlatformChange}>
+                <SelectTrigger id="platform-filter" className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Platforms</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-        <Table>
+        </CardHeader>
+        <CardContent>
+          <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -380,9 +390,9 @@ export function PostsTable() {
         <TableBody>
           {isLoading && (
             <>
-              <TableSkeletonRow />
-              <TableSkeletonRow />
-              <TableSkeletonRow />
+              {Array.from({ length: 10 }).map((_, index) => (
+                <TableSkeletonRow key={index} />
+              ))}
             </>
           )}
           {isError && (
@@ -428,7 +438,60 @@ export function PostsTable() {
             ))}
         </TableBody>
       </Table>
-    </div>
+          {!isLoading && !isError && posts && posts.length > 0 && (
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                Showing{' '}
+                <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                  {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
+                </span>{' '}
+                to{' '}
+                <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                  {Math.min(
+                    (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                    table.getFilteredRowModel().rows.length
+                  )}
+                </span>{' '}
+                of{' '}
+                <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                  {table.getFilteredRowModel().rows.length}
+                </span>{' '}
+                posts
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Page{' '}
+                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                    {table.getState().pagination.pageIndex + 1}
+                  </span>{' '}
+                  of{' '}
+                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                    {table.getPageCount()}
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }
