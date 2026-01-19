@@ -34,34 +34,13 @@ import {
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { setSelectedPlatform } from '@/lib/store/slices/ui-slice';
 import type { Platform } from '@/lib/store/slices/ui-slice';
+import {
+  formatNumber,
+  formatPercentage,
+  formatDate,
+} from '@/lib/utils/format';
 
 type Post = Database['public']['Tables']['posts']['Row'];
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-function formatNumber(num: number | null): string {
-  if (num === null || num === undefined) {
-    return '—';
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num.toString();
-}
-
-function formatEngagementRate(rate: number | null): string {
-  if (rate === null || rate === undefined) {
-    return '—';
-  }
-  return rate.toFixed(1) + '%';
-}
 
 function formatPlatform(platform: string): string {
   return platform.charAt(0).toUpperCase() + platform.slice(1);
@@ -273,7 +252,7 @@ export function PostsTable() {
       cell: ({ row }) => (
         <TableCell className="text-right">
           <span className="text-sm text-zinc-900 dark:text-zinc-50">
-            {formatEngagementRate(row.original.engagement_rate)}
+            {formatPercentage(row.original.engagement_rate)}
           </span>
         </TableCell>
       ),

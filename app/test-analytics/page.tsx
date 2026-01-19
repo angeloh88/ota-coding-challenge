@@ -3,6 +3,12 @@
 import { useAnalytics } from '@/lib/hooks/use-analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  formatNumber,
+  formatNumberLocale,
+  formatPercentage,
+  formatDate,
+} from '@/lib/utils/format';
 
 export default function TestAnalyticsPage() {
   const { data, isLoading, isError, error } = useAnalytics();
@@ -55,7 +61,7 @@ export default function TestAnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">
-                  {data.totalEngagement.toLocaleString()}
+                  {formatNumber(data.totalEngagement)}
                 </p>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
                   Sum of all likes, comments, and shares
@@ -69,7 +75,7 @@ export default function TestAnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">
-                  {data.averageEngagementRate.toFixed(2)}%
+                  {formatPercentage(data.averageEngagementRate, { decimals: 2 })}
                 </p>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
                   Average engagement rate across all posts
@@ -85,13 +91,13 @@ export default function TestAnalyticsPage() {
                 {data.topPerformingPost ? (
                   <div className="space-y-2">
                     <p className="text-lg font-semibold">
-                      Engagement: {data.topPerformingPost.engagement.toLocaleString()}
+                      Engagement: {formatNumber(data.topPerformingPost.engagement)}
                     </p>
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                      Platform: {data.topPerformingPost.platform}
+                      Platform: {data.topPerformingPost.platform.charAt(0).toUpperCase() + data.topPerformingPost.platform.slice(1)}
                     </p>
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                      Posted: {new Date(data.topPerformingPost.postedAt).toLocaleDateString()}
+                      Posted: {formatDate(data.topPerformingPost.postedAt)}
                     </p>
                     {data.topPerformingPost.caption && (
                       <p className="text-sm mt-2 p-2 bg-zinc-100 dark:bg-zinc-800 rounded">
@@ -117,7 +123,7 @@ export default function TestAnalyticsPage() {
                     {data.trend.direction === 'up' && '↑'}
                     {data.trend.direction === 'down' && '↓'}
                     {data.trend.direction === 'neutral' && '→'}{' '}
-                    {data.trend.percentage.toFixed(2)}%
+                    {formatPercentage(data.trend.percentage, { decimals: 2 })}
                   </p>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">
                     Direction: {data.trend.direction}

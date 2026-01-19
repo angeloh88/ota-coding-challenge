@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUp, ArrowDown, Minus, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatNumberLocale, formatPercentage } from '@/lib/utils/format';
 
 export interface SummaryCardTrend {
   percentage: number;
@@ -29,7 +30,7 @@ export function SummaryCard({
   description,
 }: SummaryCardProps) {
   const formattedValue =
-    typeof value === 'number' ? value.toLocaleString() : value;
+    typeof value === 'number' ? formatNumberLocale(value) : value;
 
   return (
     <Card>
@@ -72,7 +73,7 @@ export function SummaryCard({
               <Minus className="h-3 w-3" />
             )}
             <span>
-              {trend.percentage.toFixed(1)}%{' '}
+              {formatPercentage(trend.percentage)}{' '}
               {trend.direction === 'up' && 'increase'}
               {trend.direction === 'down' && 'decrease'}
               {trend.direction === 'neutral' && 'no change'}

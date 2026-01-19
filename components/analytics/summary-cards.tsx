@@ -5,6 +5,12 @@ import { SummaryCard } from './summary-card';
 import { Heart, TrendingUp, Award, Activity } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  formatNumber,
+  formatNumberLocale,
+  formatPercentage,
+  formatDate,
+} from '@/lib/utils/format';
 
 /**
  * Summary Cards component that displays analytics metrics
@@ -45,17 +51,20 @@ export function SummaryCards() {
 
   // Format top performing post value
   const topPostValue = data.topPerformingPost
-    ? `${data.topPerformingPost.engagement.toLocaleString()} interactions`
+    ? `${formatNumber(data.topPerformingPost.engagement)} interactions`
     : 'No posts yet';
 
   // Format average engagement rate as percentage
-  const avgEngagementRateValue = `${data.averageEngagementRate.toFixed(2)}%`;
+  const avgEngagementRateValue = formatPercentage(
+    data.averageEngagementRate,
+    { decimals: 2 },
+  );
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <SummaryCard
         title="Total Engagement"
-        value={data.totalEngagement}
+        value={formatNumber(data.totalEngagement)}
         icon={Heart}
         description="Sum of all interactions"
         trend={data.trend}
@@ -72,15 +81,13 @@ export function SummaryCards() {
         icon={Award}
         description={
           data.topPerformingPost
-            ? `${data.topPerformingPost.platform} • ${new Date(
-                data.topPerformingPost.postedAt,
-              ).toLocaleDateString()}`
+            ? `${data.topPerformingPost.platform.charAt(0).toUpperCase() + data.topPerformingPost.platform.slice(1)} • ${formatDate(data.topPerformingPost.postedAt)}`
             : undefined
         }
       />
       <SummaryCard
         title="Engagement Trend"
-        value={`${data.trend.percentage.toFixed(1)}%`}
+        value={formatPercentage(data.trend.percentage)}
         icon={Activity}
         description="Last 30 days vs previous"
         trend={data.trend}
