@@ -231,11 +231,11 @@ export default function TestAnalyticsAPIPage() {
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
             <p>
-              <strong>Authenticated Test:</strong> Click "Test Authenticated Request" while logged
+              <strong>Authenticated Test:</strong> Click &ldquo;Test Authenticated Request&rdquo; while logged
               in. Should return 200 with analytics data.
             </p>
             <p>
-              <strong>Unauthenticated Test:</strong> Click "Test Unauthenticated Request" (or log
+              <strong>Unauthenticated Test:</strong> Click &ldquo;Test Unauthenticated Request&rdquo; (or log
               out first). Should return 401 Unauthorized.
             </p>
             <p>

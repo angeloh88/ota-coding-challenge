@@ -34,7 +34,7 @@ export default function SignupPage() {
       // Redirect to dashboard on success
       router.push('/dashboard');
       router.refresh();
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
       setLoading(false);
     }

@@ -39,7 +39,19 @@ function formatChartDate(dateString: string): string {
 /**
  * Custom tooltip component for the engagement chart
  */
-function CustomTooltip({ active, payload, label }: any) {
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: {
+      date: string;
+      engagement: number;
+      reach: number;
+    };
+  }>;
+  label?: string;
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (

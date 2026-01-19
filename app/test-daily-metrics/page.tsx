@@ -177,10 +177,10 @@ export default function TestDailyMetricsPage() {
 </LineChart>`}
                   </pre>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2">
-                    ✓ XAxis can use <code>dataKey="date"</code>
+                    ✓ XAxis can use <code>dataKey=&quot;date&quot;</code>
                   </p>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    ✓ Line can use <code>dataKey="engagement"</code>
+                    ✓ Line can use <code>dataKey=&quot;engagement&quot;</code>
                   </p>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">
                     ✓ All dates are filled (no gaps)

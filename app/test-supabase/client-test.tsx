@@ -5,14 +5,20 @@ import { useState } from "react";
 
 export default function ClientTest() {
   const supabase = createBrowserClient();
-  const [result, setResult] = useState<{ data: any; error: any } | null>(null);
+  const [result, setResult] = useState<{
+    data: Array<{ id: string }> | null;
+    error: unknown;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleTest = async () => {
     setLoading(true);
     setResult(null);
     const { data, error } = await supabase.from("posts").select("id").limit(1);
-    setResult({ data, error });
+    setResult({ 
+      data: data as Array<{ id: string }> | null, 
+      error: error as unknown 
+    });
     setLoading(false);
   };
 

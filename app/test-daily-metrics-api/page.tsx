@@ -281,15 +281,15 @@ export default function TestDailyMetricsAPIPage() {
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
             <p>
-              <strong>Authenticated Test:</strong> Click "Test Authenticated Request" while logged
+              <strong>Authenticated Test:</strong> Click &ldqou;Test Authenticated Request&rdquo; while logged
               in. Should return 200 with daily metrics data array.
             </p>
             <p>
-              <strong>Unauthenticated Test:</strong> Click "Test Unauthenticated Request" (or log
+              <strong>Unauthenticated Test:</strong> Click &ldqou;Test Unauthenticated Request&rdquo; (or log
               out first). Should return 401 Unauthorized.
             </p>
             <p>
-              <strong>Invalid Days Test:</strong> Click "Test Invalid Days" to verify validation.
+              <strong>Invalid Days Test:</strong> Click &ldqou;Test Invalid Days&rdquo; to verify validation.
               Should return 400 Bad Request.
             </p>
             <p>

@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Suppress Turbopack warnings for client-side libraries
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        '@tanstack/react-table': '@tanstack/react-table',
+      },
+    },
+  },
 };
 
 export default nextConfig;

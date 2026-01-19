@@ -47,7 +47,7 @@ async function validateAuthToken(): Promise<{ isValid: boolean; error?: string }
     }
 
     return { isValid: true };
-  } catch (error) {
+  } catch {
     return {
       isValid: false,
       error: 'Failed to validate authentication token.',

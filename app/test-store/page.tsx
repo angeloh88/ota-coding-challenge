@@ -170,10 +170,10 @@ export default function TestStorePage() {
           <ul className="list-disc list-inside space-y-1 text-blue-800 dark:text-blue-200">
             <li>Click platform buttons - state should update immediately</li>
             <li>Click chart type buttons - state should update immediately</li>
-            <li>Click "Open Modal" - modal state should change to true</li>
-            <li>Click "Close Modal" - modal state should change to false</li>
+            <li>Click &quot;Open Modal&quot; - modal state should change to true</li>
+            <li>Click &quot;Close Modal&quot; - modal state should change to false</li>
             <li>Check the query section - should show loading then data</li>
-            <li>Watch the "Current Redux State" section update in real-time</li>
+            <li>Watch the &quot;Current Redux State&quot; section update in real-time</li>
           </ul>
         </div>
       </div>

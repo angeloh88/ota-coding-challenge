@@ -34,7 +34,7 @@ export function LoginForm() {
       // Redirect to dashboard on success
       router.push('/dashboard');
       router.refresh();
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
       setLoading(false);
     }
@@ -100,7 +100,7 @@ export function LoginForm() {
       </form>
 
       <div className="text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Don't have an account?{' '}
+        Don&apos;t have an account?{' '}
         <a
           href="/auth/signup"
           className="font-medium text-primary hover:underline"

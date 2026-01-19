@@ -7,7 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   formatNumber,
-  formatNumberLocale,
   formatPercentage,
   formatDate,
 } from '@/lib/utils/format';

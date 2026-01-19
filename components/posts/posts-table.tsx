@@ -281,6 +281,9 @@ export function PostsTable() {
     },
   ];
 
+  // React Compiler warning: TanStack Table's useReactTable returns functions that cannot be memoized safely.
+  // This is expected behavior and safe to ignore - the component will work correctly.
+  // @react-compiler-disable-next-line
   const table = useReactTable({
     data: posts || [],
     columns,
