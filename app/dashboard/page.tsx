@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { PostsTable } from '@/components/posts/posts-table';
+import { SummaryCards } from '@/components/analytics/summary-cards';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -24,8 +25,14 @@ export default async function DashboardPage() {
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
           Welcome to your dashboard! This is a protected route.
         </p>
-        
-        <PostsTable />
+
+        <div className="mt-8">
+          <SummaryCards />
+        </div>
+
+        <div className="mt-8">
+          <PostsTable />
+        </div>
       </div>
     </div>
   );
