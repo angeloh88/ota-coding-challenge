@@ -40,7 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# strategy
-strategy.md
-development-plan.md
-Frontend_Engineer_Coding_Challenge.pdf
+# guides
+_guide/
+supabase/sql/
