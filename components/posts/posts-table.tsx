@@ -32,13 +32,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { setSelectedPlatform } from '@/lib/store/slices/ui-slice';
+import { setSelectedPlatform, openModal } from '@/lib/store/slices/ui-slice';
 import type { Platform } from '@/lib/store/slices/ui-slice';
 import {
   formatNumber,
   formatPercentage,
   formatDate,
 } from '@/lib/utils/format';
+import { PostDetailModal } from './post-detail-modal';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 
@@ -292,31 +293,33 @@ export function PostsTable() {
   });
 
   return (
-    <div className="mt-8">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Posts
-        </h2>
-        <div className="flex items-center gap-2">
-          <label
-            htmlFor="platform-filter"
-            className="text-sm text-zinc-600 dark:text-zinc-400"
-          >
-            Platform:
-          </label>
-          <Select value={selectedPlatform} onValueChange={handlePlatformChange}>
-            <SelectTrigger id="platform-filter" className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Platforms</SelectItem>
-              <SelectItem value="instagram">Instagram</SelectItem>
-              <SelectItem value="tiktok">TikTok</SelectItem>
-            </SelectContent>
-          </Select>
+    <>
+      <PostDetailModal />
+      <div className="mt-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            Posts
+          </h2>
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="platform-filter"
+              className="text-sm text-zinc-600 dark:text-zinc-400"
+            >
+              Platform:
+            </label>
+            <Select value={selectedPlatform} onValueChange={handlePlatformChange}>
+              <SelectTrigger id="platform-filter" className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Platforms</SelectItem>
+                <SelectItem value="instagram">Instagram</SelectItem>
+                <SelectItem value="tiktok">TikTok</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
-      <Table>
+        <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -408,7 +411,11 @@ export function PostsTable() {
             posts &&
             posts.length > 0 &&
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow
+                key={row.id}
+                className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                onClick={() => dispatch(openModal(row.original.id))}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <Fragment key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -419,5 +426,6 @@ export function PostsTable() {
         </TableBody>
       </Table>
     </div>
+    </>
   );
 }
