@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { PostsTest } from '@/components/posts/posts-test';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -23,6 +24,11 @@ export default async function DashboardPage() {
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
           Welcome to your dashboard! This is a protected route.
         </p>
+        
+        {/* Temporary test component for usePosts hook */}
+        <div className="mt-8">
+          <PostsTest />
+        </div>
       </div>
     </div>
   );
