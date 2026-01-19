@@ -21,8 +21,8 @@ import {
   type Column,
   flexRender,
 } from '@tanstack/react-table';
-import { useState } from 'react';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import React, { Fragment, useState } from 'react';
+import { ArrowUp, ArrowDown, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Select,
@@ -142,6 +142,36 @@ function SortableHeader({
   );
 }
 
+function ThumbnailCell({ thumbnailUrl }: { thumbnailUrl: string | null }) {
+  const [imageError, setImageError] = useState(false);
+
+  if (thumbnailUrl && !imageError) {
+    return (
+      <TableCell>
+        <div className="relative w-16 h-16 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+          <Image
+            src={thumbnailUrl}
+            alt="Post thumbnail"
+            fill
+            sizes="64px"
+            className="object-cover"
+            onError={() => setImageError(true)}
+            unoptimized={thumbnailUrl.includes('via.placeholder.com')}
+          />
+        </div>
+      </TableCell>
+    );
+  }
+
+  return (
+    <TableCell>
+      <div className="w-16 h-16 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
+        <ImageIcon className="w-6 h-6 text-zinc-400 dark:text-zinc-500" />
+      </div>
+    </TableCell>
+  );
+}
+
 export function PostsTable() {
   const selectedPlatform = useAppSelector((state) => state.ui.selectedPlatform);
   const dispatch = useAppDispatch();
@@ -159,27 +189,9 @@ export function PostsTable() {
       accessorKey: 'thumbnail_url',
       header: 'Thumbnail',
       enableSorting: false,
-      cell: ({ row }) => {
-        const thumbnailUrl = row.original.thumbnail_url;
-        return (
-          <TableCell>
-            {thumbnailUrl ? (
-              <div className="relative w-16 h-16 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-                <Image
-                  src={thumbnailUrl}
-                  alt="Post thumbnail"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            ) : (
-              <div className="w-16 h-16 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                <span className="text-xs text-zinc-400">No image</span>
-              </div>
-            )}
-          </TableCell>
-        );
-      },
+      cell: ({ row }) => (
+        <ThumbnailCell thumbnailUrl={row.original.thumbnail_url} />
+      ),
     },
     {
       accessorKey: 'caption',
@@ -418,9 +430,11 @@ export function PostsTable() {
             posts.length > 0 &&
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) =>
-                  flexRender(cell.column.columnDef.cell, cell.getContext())
-                )}
+                {row.getVisibleCells().map((cell) => (
+                  <Fragment key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Fragment>
+                ))}
               </TableRow>
             ))}
         </TableBody>
