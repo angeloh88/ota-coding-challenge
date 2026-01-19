@@ -24,6 +24,16 @@ import {
 import { useState } from 'react';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { setSelectedPlatform } from '@/lib/store/slices/ui-slice';
+import type { Platform } from '@/lib/store/slices/ui-slice';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 
@@ -133,8 +143,16 @@ function SortableHeader({
 }
 
 export function PostsTable() {
-  const { data: posts, isLoading, isError, error } = usePosts();
+  const selectedPlatform = useAppSelector((state) => state.ui.selectedPlatform);
+  const dispatch = useAppDispatch();
+  const { data: posts, isLoading, isError, error } = usePosts({
+    platform: selectedPlatform,
+  });
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  const handlePlatformChange = (value: string) => {
+    dispatch(setSelectedPlatform(value as Platform));
+  };
 
   const columns: ColumnDef<Post>[] = [
     {
@@ -284,6 +302,29 @@ export function PostsTable() {
 
   return (
     <div className="mt-8">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+          Posts
+        </h2>
+        <div className="flex items-center gap-2">
+          <label
+            htmlFor="platform-filter"
+            className="text-sm text-zinc-600 dark:text-zinc-400"
+          >
+            Platform:
+          </label>
+          <Select value={selectedPlatform} onValueChange={handlePlatformChange}>
+            <SelectTrigger id="platform-filter" className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Platforms</SelectItem>
+              <SelectItem value="instagram">Instagram</SelectItem>
+              <SelectItem value="tiktok">TikTok</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
