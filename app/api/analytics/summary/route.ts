@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { Database } from '@/lib/database.types';
+import { cookies } from 'next/headers';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 
@@ -34,15 +35,78 @@ export interface AnalyticsData {
 }
 
 /**
+ * Validates authentication token presence in cookies
+ */
+async function validateAuthToken(): Promise<{ isValid: boolean; error?: string }> {
+  try {
+    const cookieStore = await cookies();
+    const authCookies = cookieStore.getAll().filter((cookie) =>
+      cookie.name.startsWith('sb-') && cookie.name.includes('auth-token')
+    );
+
+    if (authCookies.length === 0) {
+      return {
+        isValid: false,
+        error: 'Authentication token not found. Please log in to access this resource.',
+      };
+    }
+
+    // Check if token exists and has a value
+    const hasValidToken = authCookies.some(
+      (cookie) => cookie.value && cookie.value.length > 0
+    );
+
+    if (!hasValidToken) {
+      return {
+        isValid: false,
+        error: 'Invalid authentication token. Token is empty or malformed.',
+      };
+    }
+
+    return { isValid: true };
+  } catch {
+    return {
+      isValid: false,
+      error: 'Failed to validate authentication token.',
+    };
+  }
+}
+
+/**
  * GET /api/analytics/summary
  * Returns analytics summary for the authenticated user
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Validate request method
+    if (request.method !== 'GET') {
+      return NextResponse.json(
+        {
+          error: 'Method not allowed',
+          code: 'METHOD_NOT_ALLOWED',
+          message: 'Only GET requests are supported for this endpoint.',
+        },
+        { status: 405 }
+      );
+    }
+
+    // Validate authentication token presence
+    const tokenValidation = await validateAuthToken();
+    if (!tokenValidation.isValid) {
+      return NextResponse.json(
+        {
+          error: 'Authentication required',
+          code: 'AUTH_TOKEN_MISSING',
+          message: tokenValidation.error || 'Authentication token is required.',
+        },
+        { status: 401 }
+      );
+    }
+
     // Create server-side Supabase client
     const supabase = await createClient();
 
-    // Verify authentication
+    // Verify authentication with Supabase
     const {
       data: { user },
       error: userError,
@@ -50,15 +114,35 @@ export async function GET() {
 
     if (userError) {
       return NextResponse.json(
-        { error: `Failed to get user: ${userError.message}` },
+        {
+          error: 'Authentication failed',
+          code: 'AUTH_VALIDATION_ERROR',
+          message: `Failed to validate user session: ${userError.message}`,
+        },
         { status: 401 }
       );
     }
 
     if (!user) {
       return NextResponse.json(
-        { error: 'User not authenticated' },
+        {
+          error: 'User not authenticated',
+          code: 'USER_NOT_FOUND',
+          message: 'No authenticated user found. Please log in and try again.',
+        },
         { status: 401 }
+      );
+    }
+
+    // Validate user ID format (UUID)
+    if (!user.id || typeof user.id !== 'string' || user.id.length < 10) {
+      return NextResponse.json(
+        {
+          error: 'Invalid user ID',
+          code: 'INVALID_USER_ID',
+          message: 'User ID format is invalid.',
+        },
+        { status: 400 }
       );
     }
 
@@ -71,7 +155,11 @@ export async function GET() {
 
     if (postsError) {
       return NextResponse.json(
-        { error: `Failed to fetch posts: ${postsError.message}` },
+        {
+          error: 'Database query failed',
+          code: 'DATABASE_ERROR',
+          message: `Failed to fetch posts: ${postsError.message}`,
+        },
         { status: 500 }
       );
     }
@@ -186,8 +274,14 @@ export async function GET() {
     return NextResponse.json(analyticsData);
   } catch (error) {
     console.error('Error in analytics summary API:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
+        message: `An unexpected error occurred: ${errorMessage}`,
+      },
       { status: 500 }
     );
   }
