@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { PostsTable } from '@/components/posts/posts-table';
 import { SummaryCards } from '@/components/analytics/summary-cards';
+import { EngagementChart } from '@/components/charts/engagement-chart';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -28,6 +29,10 @@ export default async function DashboardPage() {
 
         <div className="mt-8">
           <SummaryCards />
+        </div>
+
+        <div className="mt-8">
+          <EngagementChart />
         </div>
 
         <div className="mt-8">
