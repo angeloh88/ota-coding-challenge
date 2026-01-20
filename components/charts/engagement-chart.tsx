@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { formatNumber, formatDate } from '@/lib/utils/format';
 import { useAppSelector, useAppDispatch } from '@/lib/store/hooks';
 import { setChartViewType, type ChartViewType } from '@/lib/store/slices/ui-slice';
+import { useState, useEffect } from 'react';
 
 /**
  * Formats a date string for display on the chart X-axis
@@ -81,13 +82,31 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 /**
  * Engagement Chart component that displays daily engagement metrics
- * Shows a line or area chart of engagement over the last 30 days
+ * Shows a line or area chart of engagement over the last 30 days (15 days on mobile)
  * Includes toggle to switch between line and area views
  */
 export function EngagementChart() {
-  const { data, isLoading, isError } = useDailyMetrics(30);
+  const [isMobile, setIsMobile] = useState(false);
   const chartViewType = useAppSelector((state) => state.ui.chartViewType);
   const dispatch = useAppDispatch();
+
+  // Detect mobile viewport (typically < 768px)
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Check on mount
+    checkMobile();
+
+    // Listen for resize events
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Use 15 days on mobile, 30 days on desktop
+  const days = isMobile ? 15 : 30;
+  const { data, isLoading, isError } = useDailyMetrics(days);
 
   if (isLoading) {
     return (
@@ -160,7 +179,7 @@ export function EngagementChart() {
           <div>
             <CardTitle>Engagement Over Time</CardTitle>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-              Daily engagement metrics for the last 30 days
+              Daily engagement metrics for the last {days} days
             </p>
           </div>
           <div className="flex gap-2">

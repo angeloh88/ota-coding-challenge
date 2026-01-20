@@ -24,7 +24,7 @@ export default async function DashboardPage() {
           Dashboard
         </h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          Welcome to your dashboard! This is a protected route.
+          Welcome to your dashboard!
         </p>
 
         <div className="mt-8">
