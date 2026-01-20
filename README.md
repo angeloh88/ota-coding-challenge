@@ -2,7 +2,120 @@
 
 A modern, full-stack social media analytics dashboard built with Next.js, Supabase, and TypeScript. This application allows users to track and analyze their social media posts across multiple platforms (Instagram and TikTok) with comprehensive analytics, engagement metrics, and interactive visualizations.
 
-## Features
+## Design Decisions
+
+### **1. Where should engagement metrics be aggregated?**
+
+#### Chosen Approach: **API Route Aggregation**
+
+I have chosen to perform all engagement metric aggregations in the **API Route** (`/api/analytics/summary/route.ts`).
+
+#### Implementation Details
+**Location**: `app/api/analytics/summary/route.ts`
+
+**Flow**:
+1. Client component (`components/analytics/summary-cards.tsx`) calls `useAnalytics()` hook
+2. Hook (`lib/hooks/use-analytics.ts`) makes HTTP request to `/api/analytics/summary`
+3. API route fetches all posts from database for authenticated user
+4. API route performs all aggregations server-side:
+   - **Total Engagement**: Sum of (likes + comments + shares) across all posts
+   - **Average Engagement Rate**: Mean of all post engagement rates
+   - **Top Performing Post**: Post with highest total engagement
+   - **Trend Calculation**: Compares last 30 days vs previous 30 days
+5. API returns pre-aggregated JSON response
+6. Client component receives and displays the aggregated data
+
+The **API Route aggregation** approach provides the best balance of:
+   - Security and data privacy
+   - Performance for typical use cases
+   - Maintainability and code organization
+   - Flexibility for future optimizations
+
+**Trade-offs:**
+   - Network latency: HTTP round-trip (mitigated by caching)
+   - Database load: fetches all posts (acceptable for < 1000 posts)
+   - Computation: server CPU (efficient for current scale)
+   - Real-time: not real-time (acceptable for analytics dashboard)
+
+This approach is optimal for the current scale and requirements of the application. As the application grows, specific optimizations (database views, caching) can be added incrementally without requiring a complete architectural change.
+
+### **2. What data should live in Redux vs. TanStack Query vs. URL state?**
+
+#### State Management Map
+
+| State | Location | Reasoning |
+|-------|----------|-----------|
+| **Current platform filter** | Redux (`ui.selectedPlatform`) | User preference that persists across navigation |
+| **Current sort column/direction** | Component State (`useState`) | Ephemeral UI state, table-specific, resets on unmount |
+| **Selected post (modal)** | Redux (`ui.selectedPostId`, `ui.isModalOpen`) | Modal state accessible from multiple components |
+| **Chart view type (line/area)** | Redux (`ui.chartViewType`) | User preference that persists |
+| **Posts data from Supabase** | TanStack Query (`usePosts` hook) | Server state with caching, refetching, error handling |
+| **Daily metrics data** | TanStack Query (`useDailyMetrics` hook) | Server state with caching for time-series data |
+
+- **Redux**: UI preferences and modal state that need to persist or be shared
+- **TanStack Query**: All server-fetched data (automatic caching, refetching, cache invalidation)
+- **Component State**: Ephemeral UI state specific to one component (table sorting)
+
+### **3. How do you handle the case where a user has no data?**
+
+#### Empty State Strategy
+
+**Principle:** Empty states are treated as valid application states, not errors. All components gracefully handle zero data without crashing.
+
+**Component Handling:**
+
+1. **Posts Table**: Shows "No posts found" message with guidance to connect social accounts
+2. **Engagement Chart**: Renders flat line at zero (API fills all dates with `engagement: 0`, `reach: 0`)
+3. **Summary Cards**: 
+   - Total Engagement: `0`
+   - Average Engagement Rate: `0.00%` (not null - mathematically correct)
+   - Top Performing Post: `"No posts yet"` (when `null`)
+   - Trend: `0.0% no change` (neutral direction)
+
+**API Responses:**
+
+- **Analytics Summary** (`/api/analytics/summary`): Returns `{ totalEngagement: 0, averageEngagementRate: 0, topPerformingPost: null, trend: { percentage: 0, direction: 'neutral' } }`
+- **Daily Metrics** (`/api/metrics/daily`): Returns array of all requested dates with `engagement: 0, reach: 0` (fills gaps with zeros)
+
+**Key Decisions:**
+
+- ✅ **Zero values** for numeric metrics (0, 0%, etc.) - not null or "N/A"
+- ✅ **Consistent data structures** - APIs always return expected shape
+- ✅ **Chart-safe** - Recharts handles zero arrays gracefully (flat line)
+- ✅ **User-friendly messages** - Clear guidance for next steps
+- ✅ **No crashes** - All components handle empty data
+
+**Edge Cases:**
+- Engagement rate with no posts = `0%` (average of empty set)
+- Chart with no metrics = flat line at zero (all dates filled)
+- Trend with no history = `0% neutral` (no change)
+
+### **4. How should the "trend" percentage be calculated?**
+
+#### Chosen Approach: **Last 30 Days vs. Prior 30 Days**
+
+**Implementation:**
+- **Current Period**: Last 30 days (from 30 days ago to today)
+- **Previous Period**: Prior 30 days (from 60 days ago to 30 days ago)
+- **Formula**: `((currentPeriodEngagement - previousPeriodEngagement) / previousPeriodEngagement) * 100`
+
+**Why This Approach:**
+
+- ✅ **Consistent with chart**: Aligns with engagement chart's 30-day view
+- ✅ **Meaningful data**: 30 days provides sufficient data points, smooths weekly fluctuations
+- ✅ **Clear UX**: Simple "last month vs previous month" concept
+- ✅ **Better than alternatives**:
+  - 7 days: Too short, high variance, may have gaps
+  - Calendar months: Variable length, inconsistent with chart
+
+**Edge Cases:**
+- No previous data → `0% neutral`
+- No current data → Negative percentage (decrease)
+- No previous but current has data → `100% up` (new engagement)
+
+*******
+
+## App Features
 
 - 🔐 **Authentication**: Secure user authentication with Supabase Auth
 - 📊 **Analytics Dashboard**: Real-time analytics summary cards showing total posts, engagement, reach, and engagement rate
